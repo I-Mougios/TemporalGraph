@@ -1,5 +1,5 @@
 from typing import List, Iterable, Dict, Set, Tuple
-from itertools import takewhile, chain
+from itertools import takewhile, chain, combinations
 from collections import defaultdict, deque
 import numpy as np
 import pandas as pd
@@ -290,7 +290,7 @@ class Graph:
 
         katz_centrality(self, alpha: float = 0.1, beta: float = 1.0, max_iter: int = 100, tol: float = 1e-6) -> Dict[str, float]:
         Calculates the Katz centrality for each vertex in the graph. Similar to eigenvector centrality, it considers the
-       importance of a node's neighbors and the length of the connections (walks) in the graph.
+        importance of a node's neighbors and the length of the connections (walks) in the graph.
 
         plot_katz_centrality(self): Creates a histogram to visualize the distribution of Katz centrality scores for all
         vertices.
@@ -304,7 +304,7 @@ class Graph:
          (both incoming and outgoing) of a given vertex from the adjacency matrix.
 
          intersection(self, other) -> Tuple[Set[str], Set[Tuple[str, str]], Set[Tuple[str, str]]]:
-        Description:
+         Description:
         This method computes the intersection between the current graph and another graph
         (both instances of the Graph class).
         The intersection consists of:
@@ -1098,7 +1098,7 @@ class Graph:
         - vertices: A set of vertices for which the similarity matrix is to be computed.
 
         Returns:
-        - similarity_matrix: A pandas DataFrame representing the similarity matrix for the given set of vertices.
+        - similarity_matrix: A dictionary representing the geodesic similarity for the given set of vertices.
           Each entry (u, v) in the matrix contains the similarity score based on the shortest path between u and v.
 
         Assumptions:
@@ -1114,7 +1114,7 @@ class Graph:
         all_shortest_paths = self.flattened_shortest_paths()
 
         # Dictionary to store the similarity scores (shortest paths as negative values)
-        shortest_path_dict = {}
+        shortest_path_dict = dict.fromkeys(combinations(vertices, r=2), -np.inf)
 
         # Iterate over all precomputed paths and filter those whose start and end nodes are in the given set of vertices
         for path in all_shortest_paths:
@@ -1123,20 +1123,20 @@ class Graph:
                 score = -len(path) + 1
                 shortest_path_dict[(path[0], path[-1])] = score
 
-        # Convert the set of vertices to a list for indexing purposes in the matrix
-        vertices_list = list(vertices)
+        # # Convert the set of vertices to a list for indexing purposes in the matrix
+        # vertices_list = list(vertices)
+        #
+        # # Initialize a similarity matrix of zeros, indexed and labeled by the vertices
+        # similarity_matrix = pd.DataFrame(data=np.zeros((len(vertices), len(vertices))),
+        #                                  index=vertices_list,
+        #                                  columns=vertices_list)
+        #
+        # # Populate the matrix with similarity scores from the shortest_path_dict
+        # for key, value in shortest_path_dict.items():
+        #     start_node, end_node = key[0], key[1]
+        #     similarity_matrix.loc[start_node, end_node] = value
 
-        # Initialize a similarity matrix of zeros, indexed and labeled by the vertices
-        similarity_matrix = pd.DataFrame(data=np.zeros((len(vertices), len(vertices))),
-                                         index=vertices_list,
-                                         columns=vertices_list)
-
-        # Populate the matrix with similarity scores from the shortest_path_dict
-        for key, value in shortest_path_dict.items():
-            start_node, end_node = key[0], key[1]
-            similarity_matrix.loc[start_node, end_node] = value
-
-        return similarity_matrix
+        return shortest_path_dict
 
     def get_neighbors_from_adjacency_matrix(self, vertex) -> Set[str]:
         """
