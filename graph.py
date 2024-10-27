@@ -1,5 +1,5 @@
 from typing import List, Iterable, Dict, Set, Tuple
-from itertools import takewhile, chain, combinations
+from itertools import takewhile, chain, product
 from collections import defaultdict, deque
 import numpy as np
 import pandas as pd
@@ -1114,7 +1114,7 @@ class Graph:
         all_shortest_paths = self.flattened_shortest_paths()
 
         # Dictionary to store the similarity scores (shortest paths as negative values)
-        shortest_path_dict = dict.fromkeys(combinations(vertices, r=2), -np.inf)
+        shortest_path_dict = dict.fromkeys(product(vertices, vertices), -1000)
 
         # Iterate over all precomputed paths and filter those whose start and end nodes are in the given set of vertices
         for path in all_shortest_paths:
